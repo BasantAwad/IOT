@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NovaCare Fall Detection Dashboard</title>
+    <style>
+      :root {
+        --bg-primary: #0a0a0f;
+        --bg-secondary: #12121a;
+        --bg-card: #1a1a25;
+        --accent-primary: #6366f1;
+        --accent-secondary: #8b5cf6;
+        --accent-danger: #ef4444;
+        --accent-success: #22c55e;
+        --accent-warning: #f59e0b;
+        --text-primary: #f8fafc;
+        --text-secondary: #94a3b8;
+        --border-color: #2a2a3a;
+        --glass-bg: rgba(26, 26, 37, 0.8);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      /* Animated background */
+      body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(
+            circle at 20% 20%,
+            rgba(99, 102, 241, 0.1) 0%,
+            transparent 40%
+          ),
+          radial-gradient(
+            circle at 80% 80%,
+            rgba(139, 92, 246, 0.1) 0%,
+            transparent 40%
+          );
+        z-index: -1;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      /* Header */
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 30px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        border: 1px solid var(--border-color);
+        margin-bottom: 20px;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .logo-icon {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(
+          135deg,
+          var(--accent-primary),
+          var(--accent-secondary)
+        );
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+      }
+
+      .logo h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        background: linear-gradient(
+          135deg,
+          var(--text-primary),
+          var(--text-secondary)
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .logo span {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+      }
+
+      .status-badges {
+        display: flex;
+        gap: 12px;
+      }
+
+      .badge {
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .badge::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+      }
+
+      .badge-success {
+        background: rgba(34, 197, 94, 0.15);
+        color: var(--accent-success);
+        border: 1px solid rgba(34, 197, 94, 0.3);
+      }
+
+      .badge-success::before {
+        background: var(--accent-success);
+      }
+
+      .badge-danger {
+        background: rgba(239, 68, 68, 0.15);
+        color: var(--accent-danger);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+      }
+
+      .badge-danger::before {
+        background: var(--accent-danger);
+      }
+
+      .badge-warning {
+        background: rgba(245, 158, 11, 0.15);
+        color: var(--accent-warning);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+      }
+
+      .badge-warning::before {
+        background: var(--accent-warning);
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.4;
+        }
+      }
+
+      /* Main Grid */
+      .main-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 20px;
+      }
+
+      @media (max-width: 1024px) {
+        .main-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* Card Styles */
+      .card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+      }
+
+      .card-header {
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .card-header h2 {
+        font-size: 1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .card-body {
+        padding: 20px;
+      }
+
+      /* Video Feed */
+      .video-container {
+        position: relative;
+        background: #000;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      .video-container img {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      .video-overlay {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        right: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+      }
+
+      .live-indicator {
+        padding: 6px 12px;
+        background: rgba(239, 68, 68, 0.9);
+        color: white;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .live-indicator::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        background: white;
+        border-radius: 50%;
+        animation: blink 1s infinite;
+      }
+
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
+      }
+
+      /* Stats Grid */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      .stat-card {
+        background: var(--bg-secondary);
+        padding: 16px;
+        border-radius: 12px;
+        text-align: center;
+        border: 1px solid var(--border-color);
+      }
+
+      .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--accent-primary);
+      }
+
+      .stat-label {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin-top: 4px;
+      }
+
+      /* Events List */
+      .events-list {
+        max-height: 400px;
+        overflow-y: auto;
+      }
+
+      .event-item {
+        padding: 16px;
+        border-bottom: 1px solid var(--border-color);
+        transition: background 0.2s;
+      }
+
+      .event-item:hover {
+        background: rgba(99, 102, 241, 0.05);
+      }
+
+      .event-item:last-child {
+        border-bottom: none;
+      }
+
+      .event-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+
+      .event-type {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        color: var(--accent-danger);
+      }
+
+      .event-type::before {
+        content: "⚠️";
+      }
+
+      .event-time {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+      }
+
+      .event-details {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+      }
+
+      .confidence-bar {
+        width: 100%;
+        height: 4px;
+        background: var(--bg-secondary);
+        border-radius: 2px;
+        margin-top: 8px;
+        overflow: hidden;
+      }
+
+      .confidence-fill {
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          var(--accent-warning),
+          var(--accent-danger)
+        );
+        border-radius: 2px;
+        transition: width 0.3s;
+      }
+
+      /* No events message */
+      .no-events {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--text-secondary);
+      }
+
+      .no-events-icon {
+        font-size: 3rem;
+        margin-bottom: 12px;
+      }
+
+      /* Scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: var(--bg-secondary);
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 3px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--accent-primary);
+      }
+
+      /* Alert Banner */
+      .alert-banner {
+        display: none;
+        padding: 16px 20px;
+        background: linear-gradient(
+          90deg,
+          rgba(239, 68, 68, 0.2),
+          rgba(239, 68, 68, 0.1)
+        );
+        border: 1px solid var(--accent-danger);
+        border-radius: 12px;
+        margin-bottom: 20px;
+        animation: alertPulse 2s infinite;
+      }
+
+      .alert-banner.active {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      @keyframes alertPulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.7;
+        }
+      }
+
+      .alert-icon {
+        font-size: 2rem;
+      }
+
+      .alert-content h3 {
+        color: var(--accent-danger);
+        font-size: 1.1rem;
+      }
+
+      .alert-content p {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Alert Banner -->
+      <div class="alert-banner" id="alertBanner">
+        <span class="alert-icon">🚨</span>
+        <div class="alert-content">
+          <h3>Fall Detected!</h3>
+          <p id="alertMessage">
+            A fall has been detected. Please check the camera feed.
+          </p>
+        </div>
+      </div>
+
+      <!-- Header -->
+      <header class="header">
+        <div class="logo">
+          <div class="logo-icon">🛡️</div>
+          <div>
+            <h1>NovaCare</h1>
+            <span>Fall Detection System</span>
+          </div>
+        </div>
+        <div class="status-badges">
+          <span class="badge badge-success" id="cameraStatus"
+            >Camera Online</span
+          >
+          <span class="badge badge-warning" id="mqttStatus"
+            >MQTT Disconnected</span
+          >
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <div class="main-grid">
+        <!-- Video Feed Card -->
+        <div class="card">
+          <div class="card-header">
+            <h2>📹 Live Camera Feed</h2>
+          </div>
+          <div class="card-body">
+            <div class="video-container">
+              <img src="/video_feed" alt="Live Camera Feed" id="videoFeed" />
+              <div class="video-overlay">
+                <div class="live-indicator">LIVE</div>
+              </div>
+            </div>
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-value" id="eventCount">0</div>
+                <div class="stat-label">Falls Today</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value" id="uptime">00:00</div>
+                <div class="stat-label">Uptime</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value" id="fps">30</div>
+                <div class="stat-label">FPS</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Events Card -->
+        <div class="card">
+          <div class="card-header">
+            <h2>📋 Recent Events</h2>
+          </div>
+          <div class="events-list" id="eventsList">
+            <div class="no-events">
+              <div class="no-events-icon">✅</div>
+              <p>No fall events detected</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let eventCount = 0;
+      let startTime = Date.now();
+
+      // Update uptime
+      function updateUptime() {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const hours = Math.floor(elapsed / 3600);
+        const minutes = Math.floor((elapsed % 3600) / 60);
+        const seconds = elapsed % 60;
+        document.getElementById("uptime").textContent = `${hours
+          .toString()
+          .padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds
+          .toString()
+          .padStart(2, "0")}`;
+      }
+
+      // Fetch and update status
+      async function updateStatus() {
+        try {
+          const response = await fetch("/api/status");
+          const status = await response.json();
+
+          const cameraEl = document.getElementById("cameraStatus");
+          const mqttEl = document.getElementById("mqttStatus");
+
+          if (status.camera === "connected") {
+            cameraEl.textContent = "Camera Online";
+            cameraEl.className = "badge badge-success";
+          } else if (status.camera === "error") {
+            cameraEl.textContent = "Camera Error";
+            cameraEl.className = "badge badge-danger";
+          } else {
+            cameraEl.textContent = "Camera " + status.camera;
+            cameraEl.className = "badge badge-warning";
+          }
+
+          if (status.mqtt === "connected") {
+            mqttEl.textContent = "MQTT Connected";
+            mqttEl.className = "badge badge-success";
+          } else {
+            mqttEl.textContent = "MQTT Disconnected";
+            mqttEl.className = "badge badge-warning";
+          }
+        } catch (error) {
+          console.error("Failed to fetch status:", error);
+        }
+      }
+
+      // Fetch and update events
+      async function updateEvents() {
+        try {
+          const response = await fetch("/api/events");
+          const events = await response.json();
+
+          const listEl = document.getElementById("eventsList");
+
+          if (events.length === 0) {
+            listEl.innerHTML = `
+                        <div class="no-events">
+                            <div class="no-events-icon">✅</div>
+                            <p>No fall events detected</p>
+                        </div>
+                    `;
+            return;
+          }
+
+          // Update event count
+          document.getElementById("eventCount").textContent = events.length;
+
+          // Check for new events
+          if (events.length > eventCount) {
+            showAlert(events[0]);
+            eventCount = events.length;
+          }
+
+          listEl.innerHTML = events
+            .map(
+              (event) => `
+                    <div class="event-item">
+                        <div class="event-header">
+                            <span class="event-type">Fall Detected</span>
+                            <span class="event-time">${
+                              event.timestamp_str
+                            }</span>
+                        </div>
+                        <div class="event-details">
+                            Confidence: ${(event.confidence * 100).toFixed(1)}%
+                            ${
+                              event.clip_path
+                                ? `<br>Clip: ${event.clip_path}`
+                                : ""
+                            }
+                        </div>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" style="width: ${
+                              event.confidence * 100
+                            }%"></div>
+                        </div>
+                    </div>
+                `
+            )
+            .join("");
+        } catch (error) {
+          console.error("Failed to fetch events:", error);
+        }
+      }
+
+      // Show alert banner
+      function showAlert(event) {
+        const banner = document.getElementById("alertBanner");
+        const message = document.getElementById("alertMessage");
+        message.textContent = `Fall detected at ${event.timestamp_str} with ${(
+          event.confidence * 100
+        ).toFixed(1)}% confidence`;
+        banner.classList.add("active");
+
+        // Play alert sound
+        playAlertSound();
+
+        // Hide after 10 seconds
+        setTimeout(() => {
+          banner.classList.remove("active");
+        }, 10000);
+      }
+
+      // Play alert sound
+      function playAlertSound() {
+        try {
+          const audioContext = new (window.AudioContext ||
+            window.webkitAudioContext)();
+          const oscillator = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+
+          oscillator.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+
+          oscillator.frequency.value = 800;
+          oscillator.type = "sine";
+          gainNode.gain.value = 0.3;
+
+          oscillator.start();
+
+          setTimeout(() => {
+            oscillator.stop();
+          }, 500);
+        } catch (e) {
+          console.log("Could not play alert sound");
+        }
+      }
+
+      // Initialize
+      setInterval(updateUptime, 1000);
+      setInterval(updateStatus, 5000);
+      setInterval(updateEvents, 2000);
+
+      updateStatus();
+      updateEvents();
+    </script>
+  </body>
+</html>
