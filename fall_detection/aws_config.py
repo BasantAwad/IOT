@@ -10,24 +10,24 @@ AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY', 'YOUR_SECRET_ACC
 AWS_REGION = os.environ.get('AWS_REGION', 'us-east-1')
 
 # S3 Configuration (for storing fall clips in cloud)
-S3_ENABLED = False  # Set to True to enable S3 uploads
+S3_ENABLED = True  # Set to True to enable S3 uploads
 S3_BUCKET_NAME = 'novacare-fall-detection'
 S3_CLIPS_PREFIX = 'clips/'  # Prefix for clip files in bucket
 
 # SNS Configuration (for push notifications)
-SNS_ENABLED = False  # Set to True to enable SNS notifications
-SNS_TOPIC_ARN = 'arn:aws:sns:us-east-1:YOUR_ACCOUNT_ID:novacare-fall-alerts'
+SNS_ENABLED = True  # Set to True to enable SNS notifications
+SNS_TOPIC_ARN = 'arn:aws:sns:us-east-1:526275945875:novacare-fall-alerts'
 
 # IoT Core Configuration (alternative to MQTT)
-IOT_CORE_ENABLED = False  # Set to True to use AWS IoT Core instead of local MQTT
-IOT_CORE_ENDPOINT = 'YOUR_IOT_ENDPOINT.iot.us-east-1.amazonaws.com'
+IOT_CORE_ENABLED = True  # Set to True to use AWS IoT Core instead of local MQTT
+IOT_CORE_ENDPOINT = 'a3vbyo79k8vjec-ats.iot.us-east-1.amazonaws.com'
 IOT_CORE_TOPIC = 'novacare/fall'
 IOT_CORE_CERT_PATH = 'certs/device.pem.crt'
 IOT_CORE_KEY_PATH = 'certs/private.pem.key'
 IOT_CORE_ROOT_CA_PATH = 'certs/AmazonRootCA1.pem'
 
 # DynamoDB Configuration (for storing event history)
-DYNAMODB_ENABLED = False  # Set to True to enable DynamoDB logging
+DYNAMODB_ENABLED = True  # Set to True to enable DynamoDB logging
 DYNAMODB_TABLE_NAME = 'novacare-fall-events'
 
 

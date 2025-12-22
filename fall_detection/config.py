@@ -25,4 +25,4 @@ CLIP_POST_SECONDS = 2    # Seconds of video to save after fall
 # Flask Dashboard
 FLASK_HOST = "0.0.0.0"
 FLASK_PORT = 5000
-FLASK_DEBUG = False
+FLASK_DEBUG = True
