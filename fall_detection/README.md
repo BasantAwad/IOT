@@ -6,14 +6,19 @@ A complete fall detection system for Raspberry Pi using MediaPipe pose estimatio
 
 ### 1. Set Up Virtual Environment
 
+> ⚠️ **Important**: This project requires **Python 3.10** due to MediaPipe compatibility. Python 3.11+ is not supported.
+
 ```bash
-cd c:\Users\Pc\IOT\fall_detection
-python -m venv .venv
+cd fall_detection
+
+# Create venv with Python 3.10 specifically
+py -3.10 -m venv .venv
 
 # Windows
 .venv\Scripts\activate
 
 # Linux/macOS/Raspberry Pi
+# python3.10 -m venv .venv
 # source .venv/bin/activate
 ```
 
@@ -99,7 +104,7 @@ Fall events are published as JSON:
 
 ## 📋 Requirements
 
-- Python 3.8+
+- **Python 3.10** (required - MediaPipe 0.10.9 is not compatible with Python 3.11+)
 - Camera (Pi camera, USB webcam, or any OpenCV-compatible camera)
 - MQTT broker (optional, for event publishing)
 

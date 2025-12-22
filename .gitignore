@@ -1,0 +1,14 @@
+# Ignore virtual environment
+.venv_new
+
+# Ignore logs
+*.log
+
+# Ignore video clips
+clips
+.env
+*.pem
+*.key
+*.crt
+*.pyc
+*.exe
