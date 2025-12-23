@@ -13,6 +13,9 @@ CAMERA_WIDTH = 640
 CAMERA_HEIGHT = 480
 CAMERA_FPS = 30
 
+# Raspberry Pi Camera Settings
+PI_CAMERA_ROTATION = 0  # Rotation in degrees (0, 90, 180, 270)
+
 # Fall Detection Settings
 FALL_CONFIDENCE_THRESHOLD = 0.7  # Minimum confidence to trigger fall alert
 FALL_COOLDOWN_SECONDS = 5  # Minimum time between fall alerts
