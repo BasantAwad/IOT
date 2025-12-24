@@ -1,0 +1,13 @@
+# Raspberry Pi Camera Streamer Dependencies
+# ==========================================
+# Install with: pip install -r pi_requirements.txt
+
+# AWS IoT Device SDK
+awsiotsdk>=1.21.0
+
+# OpenCV (headless version for Pi without display)
+opencv-python-headless>=4.8.0
+
+# Optional: Pi Camera 2 support (for native Pi camera)
+# picamera2>=0.3.0
+# Note: picamera2 may require system-level installation on Raspberry Pi OS

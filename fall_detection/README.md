@@ -107,6 +107,41 @@ Fall events are published as JSON:
 - **Python 3.10** (required - MediaPipe 0.10.9 is not compatible with Python 3.11+)
 - Camera (Pi camera, USB webcam, or any OpenCV-compatible camera)
 - MQTT broker (optional, for event publishing)
+- AWS account (optional, for cloud features)
+
+## ☁️ AWS Cloud Integration (Optional)
+
+The system can upload clips to S3, log events to DynamoDB, and send SNS notifications.
+
+### AWS Setup
+
+1. **Configure AWS credentials** via environment variables:
+   ```bash
+   export AWS_ACCESS_KEY_ID=your_access_key
+   export AWS_SECRET_ACCESS_KEY=your_secret_key
+   export AWS_REGION=us-east-1
+   ```
+
+2. **Edit `aws_config.py`** to configure your AWS resources:
+   ```python
+   S3_BUCKET_NAME = 'your-bucket-name'
+   SNS_TOPIC_ARN = 'arn:aws:sns:region:account:topic-name'
+   DYNAMODB_TABLE_NAME = 'your-table-name'
+   ```
+
+3. **Create required AWS resources**:
+   - **S3 Bucket**: Create a bucket for storing fall clips
+   - **DynamoDB Table**: Create with `event_id` (String) as partition key
+   - **SNS Topic**: Create and subscribe your email/phone for alerts
+
+### Enable/Disable Services
+
+In `aws_config.py`, toggle each service:
+```python
+S3_ENABLED = True       # Upload clips to S3
+DYNAMODB_ENABLED = True # Log events to DynamoDB  
+SNS_ENABLED = True      # Send push notifications
+```
 
 ## 🔒 Notes
 

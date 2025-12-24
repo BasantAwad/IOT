@@ -2,6 +2,7 @@
 Video Clip Saver Module
 =======================
 Saves video clips when falls are detected, including frames before and after detection.
+Optionally uploads clips to AWS S3 for cloud storage.
 """
 
 import cv2
@@ -12,6 +13,12 @@ from collections import deque
 from config import SAVE_CLIPS_DIR, CLIP_BUFFER_SECONDS, CLIP_POST_SECONDS, CAMERA_FPS
 import logging
 
+# Import S3 uploader for cloud storage
+try:
+    from aws_services import get_s3_uploader
+    AWS_AVAILABLE = True
+except ImportError:
+    AWS_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -105,7 +112,7 @@ class ClipSaver:
             return self.current_clip_path
             
     def _finalize_clip(self):
-        """Save the recorded clip to disk."""
+        """Save the recorded clip to disk and upload to S3."""
         if not self.recording_frames:
             self.is_recording = False
             return
@@ -129,6 +136,16 @@ class ClipSaver:
         writer.release()
         
         logger.info(f"Saved clip: {self.current_clip_path} ({len(self.recording_frames)} frames)")
+        
+        # Upload to S3 asynchronously if AWS is available
+        if AWS_AVAILABLE:
+            try:
+                s3_uploader = get_s3_uploader()
+                if s3_uploader.enabled:
+                    s3_uploader.upload_async(self.current_clip_path)
+                    logger.info(f"Queued clip for S3 upload: {self.current_clip_path}")
+            except Exception as e:
+                logger.error(f"Failed to queue S3 upload: {e}")
         
         # Reset state
         self.is_recording = False

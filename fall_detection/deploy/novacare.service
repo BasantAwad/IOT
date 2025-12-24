@@ -1,0 +1,22 @@
+[Unit]
+Description=NovaCare Fall Detection System
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/novacare
+Environment="PATH=/home/ubuntu/novacare/.venv/bin"
+ExecStart=/home/ubuntu/novacare/.venv/bin/python run_camera_ec2.py --source remote --port 5000
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

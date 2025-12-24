@@ -1,0 +1,17 @@
+[Unit]
+Description=NovaCare Pi Camera Streamer
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/novacare/raspberry_pi
+ExecStart=/usr/bin/python3 pi_camera_streamer.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

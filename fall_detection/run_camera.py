@@ -2,7 +2,8 @@
 Fall Detection System - Main Application
 =========================================
 Captures camera frames, runs fall detection, publishes events via MQTT,
-and streams video to Flask dashboard.
+and streams video to Flask dashboard. Integrates with AWS for cloud storage
+and notifications.
 """
 
 import cv2
@@ -16,6 +17,13 @@ from fall_detector import FallDetector
 from mqtt_client import MQTTPublisher
 from clip_saver import ClipSaver
 import config
+
+# Import AWS services (optional - gracefully degrades if not configured)
+try:
+    from aws_services import get_dynamodb_logger, get_sns_notifier
+    AWS_SERVICES_AVAILABLE = True
+except ImportError:
+    AWS_SERVICES_AVAILABLE = False
 
 # Configure logging
 logging.basicConfig(
@@ -36,6 +44,9 @@ system_status = {
     'camera': 'initializing',
     'mqtt': 'disconnected',
     'detection': 'initializing',
+    'aws_s3': 'disabled',
+    'aws_dynamodb': 'disabled',
+    'aws_sns': 'disabled',
     'last_fall': None
 }
 
@@ -120,7 +131,8 @@ def detect_and_publish():
                         'timestamp': int(current_time),
                         'timestamp_str': time.strftime("%Y-%m-%d %H:%M:%S"),
                         'confidence': round(confidence, 3),
-                        'clip_path': clip_path
+                        'clip_path': clip_path,
+                        'device_id': config.MQTT_CLIENT_ID
                     }
                     with fall_events_lock:
                         fall_events.insert(0, event)
@@ -129,6 +141,28 @@ def detect_and_publish():
                             fall_events.pop()
                     
                     system_status['last_fall'] = event['timestamp_str']
+                    
+                    # AWS: Log event to DynamoDB and send SNS notification
+                    if AWS_SERVICES_AVAILABLE:
+                        try:
+                            dynamodb_logger = get_dynamodb_logger()
+                            if dynamodb_logger.enabled:
+                                dynamodb_logger.log_event_async(event)
+                                logger.info("Queued event for DynamoDB logging")
+                        except Exception as e:
+                            logger.error(f"DynamoDB logging error: {e}")
+                        
+                        try:
+                            sns_notifier = get_sns_notifier()
+                            if sns_notifier.enabled:
+                                sns_notifier.send_alert_async(
+                                    confidence=confidence,
+                                    clip_url=clip_path,
+                                    device_id=config.MQTT_CLIENT_ID
+                                )
+                                logger.info("Queued SNS fall alert notification")
+                        except Exception as e:
+                            logger.error(f"SNS notification error: {e}")
             
             # Update output frame for streaming
             with frame_lock:
